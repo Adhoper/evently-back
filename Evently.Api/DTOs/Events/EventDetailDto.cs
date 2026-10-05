@@ -1,8 +1,6 @@
-﻿using Evently.Api.Models.Enums;
-
-namespace Evently.Api.Models
+﻿namespace Evently.Api.DTOs.Events
 {
-    public class Event
+    public class EventDetailDto
     {
         public int Id { get; set; }
 
@@ -20,12 +18,12 @@ namespace Evently.Api.Models
 
         public string? ImageUrl { get; set; }
 
-        public EventStatus Status { get; set; } = EventStatus.Draft;
+        public string Status { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public int EventCategoryId { get; set; }
 
-        public EventCategory EventCategory { get; set; } = null!;
+        public string CategoryName { get; set; } = string.Empty;
     }
 }
