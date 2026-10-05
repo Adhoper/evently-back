@@ -30,7 +30,10 @@ namespace Evently.Api.Controllers
 
             if (eventItem is null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = "El evento no existe."
+                });
             }
 
             return Ok(eventItem);
@@ -46,7 +49,8 @@ namespace Evently.Api.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "La categoría seleccionada no existe o está inactiva."
+                    message =
+                        "La categoría seleccionada no existe o está inactiva."
                 });
             }
 
@@ -54,6 +58,80 @@ namespace Evently.Api.Controllers
                 nameof(GetById),
                 new { id = eventItem.Id },
                 eventItem);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<EventDetailDto>> Update(
+            int id,
+            UpdateEventDto dto)
+        {
+            var result = await _eventService.UpdateAsync(id, dto);
+
+            if (!result.Success)
+            {
+                if (result.NotFound)
+                {
+                    return NotFound(new
+                    {
+                        message = result.Message
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    message = result.Message
+                });
+            }
+
+            return Ok(result.Data);
+        }
+
+        [HttpPatch("{id:int}/publish")]
+        public async Task<ActionResult<EventDetailDto>> Publish(int id)
+        {
+            var result = await _eventService.PublishAsync(id);
+
+            if (!result.Success)
+            {
+                if (result.NotFound)
+                {
+                    return NotFound(new
+                    {
+                        message = result.Message
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    message = result.Message
+                });
+            }
+
+            return Ok(result.Data);
+        }
+
+        [HttpPatch("{id:int}/cancel")]
+        public async Task<ActionResult<EventDetailDto>> Cancel(int id)
+        {
+            var result = await _eventService.CancelAsync(id);
+
+            if (!result.Success)
+            {
+                if (result.NotFound)
+                {
+                    return NotFound(new
+                    {
+                        message = result.Message
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    message = result.Message
+                });
+            }
+
+            return Ok(result.Data);
         }
     }
 }
