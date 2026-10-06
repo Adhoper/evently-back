@@ -27,5 +27,9 @@ namespace Evently.Api.Models
         public int EventCategoryId { get; set; }
 
         public EventCategory EventCategory { get; set; } = null!;
+
+        public int OrganizerId { get; set; }
+
+        public User Organizer { get; set; } = null!;
     }
 }
