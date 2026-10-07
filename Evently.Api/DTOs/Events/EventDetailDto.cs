@@ -25,5 +25,11 @@
         public int EventCategoryId { get; set; }
 
         public string CategoryName { get; set; } = string.Empty;
+
+        public int ReservedCount { get; set; }
+
+        public int AvailableSpots { get; set; }
+
+        public bool IsSoldOut { get; set; }
     }
 }

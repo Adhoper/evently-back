@@ -31,5 +31,8 @@ namespace Evently.Api.Models
         public int OrganizerId { get; set; }
 
         public User Organizer { get; set; } = null!;
+
+        public ICollection<Ticket> Tickets { get; set; }
+    = new List<Ticket>();
     }
 }

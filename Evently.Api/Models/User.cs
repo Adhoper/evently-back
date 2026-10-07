@@ -21,5 +21,7 @@ namespace Evently.Api.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Event> Events { get; set; } = new List<Event>();
+        public ICollection<Ticket> Tickets { get; set; }
+    = new List<Ticket>();
     }
 }

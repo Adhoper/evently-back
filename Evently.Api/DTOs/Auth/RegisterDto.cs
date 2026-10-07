@@ -20,6 +20,11 @@ namespace Evently.Api.DTOs.Auth
         [Required]
         [MinLength(8)]
         [MaxLength(100)]
+        [RegularExpression(
+            @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
+            ErrorMessage =
+                "La contraseña debe contener una mayúscula, una minúscula y un número."
+        )]
         public string Password { get; set; } = string.Empty;
     }
 }

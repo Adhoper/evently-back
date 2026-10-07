@@ -44,7 +44,12 @@ namespace Evently.Api.Services
                 .ToListAsync();
         }
 
-        public async Task<EventDetailDto?> GetPublicByIdAsync(int id)
+        // =====================================================
+        // PUBLIC - DETAIL
+        // =====================================================
+
+        public async Task<EventDetailDto?> GetPublicByIdAsync(
+            int id)
         {
             return await _context.Events
                 .AsNoTracking()
@@ -63,8 +68,26 @@ namespace Evently.Api.Services
                     ImageUrl = e.ImageUrl,
                     Status = e.Status.ToString(),
                     CreatedAt = e.CreatedAt,
+
                     EventCategoryId = e.EventCategoryId,
-                    CategoryName = e.EventCategory.Name
+                    CategoryName = e.EventCategory.Name,
+
+                    // =========================================
+                    // TICKET AVAILABILITY
+                    // =========================================
+
+                    ReservedCount = e.Tickets.Count(t =>
+                        t.Status != TicketStatus.Cancelled),
+
+                    AvailableSpots =
+                        e.Capacity -
+                        e.Tickets.Count(t =>
+                            t.Status != TicketStatus.Cancelled),
+
+                    IsSoldOut =
+                        e.Tickets.Count(t =>
+                            t.Status != TicketStatus.Cancelled)
+                        >= e.Capacity
                 })
                 .FirstOrDefaultAsync();
         }
@@ -73,11 +96,13 @@ namespace Evently.Api.Services
         // ORGANIZER - MY EVENTS
         // =====================================================
 
-        public async Task<List<EventDto>> GetMineAsync(int organizerId)
+        public async Task<List<EventDto>> GetMineAsync(
+            int organizerId)
         {
             return await _context.Events
                 .AsNoTracking()
-                .Where(e => e.OrganizerId == organizerId)
+                .Where(e =>
+                    e.OrganizerId == organizerId)
                 .OrderByDescending(e => e.CreatedAt)
                 .Select(e => new EventDto
                 {
@@ -94,6 +119,10 @@ namespace Evently.Api.Services
                 })
                 .ToListAsync();
         }
+
+        // =====================================================
+        // ORGANIZER - MY EVENT DETAIL
+        // =====================================================
 
         public async Task<EventDetailDto?> GetMineByIdAsync(
             int id,
@@ -116,8 +145,26 @@ namespace Evently.Api.Services
                     ImageUrl = e.ImageUrl,
                     Status = e.Status.ToString(),
                     CreatedAt = e.CreatedAt,
+
                     EventCategoryId = e.EventCategoryId,
-                    CategoryName = e.EventCategory.Name
+                    CategoryName = e.EventCategory.Name,
+
+                    // =========================================
+                    // TICKET AVAILABILITY
+                    // =========================================
+
+                    ReservedCount = e.Tickets.Count(t =>
+                        t.Status != TicketStatus.Cancelled),
+
+                    AvailableSpots =
+                        e.Capacity -
+                        e.Tickets.Count(t =>
+                            t.Status != TicketStatus.Cancelled),
+
+                    IsSoldOut =
+                        e.Tickets.Count(t =>
+                            t.Status != TicketStatus.Cancelled)
+                        >= e.Capacity
                 })
                 .FirstOrDefaultAsync();
         }
@@ -130,10 +177,11 @@ namespace Evently.Api.Services
             CreateEventDto dto,
             int organizerId)
         {
-            var categoryExists = await _context.EventCategories
-                .AnyAsync(c =>
-                    c.Id == dto.EventCategoryId &&
-                    c.IsActive);
+            var categoryExists =
+                await _context.EventCategories
+                    .AnyAsync(c =>
+                        c.Id == dto.EventCategoryId &&
+                        c.IsActive);
 
             if (!categoryExists)
             {
@@ -149,21 +197,26 @@ namespace Evently.Api.Services
                 Location = dto.Location.Trim(),
                 Capacity = dto.Capacity,
                 ImageUrl = dto.ImageUrl,
+
                 Status = EventStatus.Draft,
+
                 CreatedAt = DateTime.UtcNow,
-                EventCategoryId = dto.EventCategoryId,
+
+                EventCategoryId =
+                    dto.EventCategoryId,
 
                 // El OrganizerId viene del usuario autenticado
                 // mediante el JWT.
                 OrganizerId = organizerId
             };
 
-            _context.Events.Add(eventEntity);
+            _context.Events.Add(
+                eventEntity);
 
             await _context.SaveChangesAsync();
 
-            // El evento nace como Draft, por lo tanto NO podemos
-            // utilizar GetPublicByIdAsync.
+            // El evento nace como Draft, por lo tanto
+            // no utilizamos GetPublicByIdAsync.
             return await GetMineByIdAsync(
                 eventEntity.Id,
                 organizerId);
@@ -173,15 +226,17 @@ namespace Evently.Api.Services
         // UPDATE
         // =====================================================
 
-        public async Task<ServiceResult<EventDetailDto>> UpdateAsync(
-            int id,
-            UpdateEventDto dto,
-            int organizerId)
+        public async Task<ServiceResult<EventDetailDto>>
+            UpdateAsync(
+                int id,
+                UpdateEventDto dto,
+                int organizerId)
         {
-            var eventEntity = await _context.Events
-                .FirstOrDefaultAsync(e =>
-                    e.Id == id &&
-                    e.OrganizerId == organizerId);
+            var eventEntity =
+                await _context.Events
+                    .FirstOrDefaultAsync(e =>
+                        e.Id == id &&
+                        e.OrganizerId == organizerId);
 
             if (eventEntity is null)
             {
@@ -190,24 +245,27 @@ namespace Evently.Api.Services
                         "El evento no existe o no pertenece al usuario.");
             }
 
-            if (eventEntity.Status == EventStatus.Cancelled)
+            if (eventEntity.Status ==
+                EventStatus.Cancelled)
             {
                 return ServiceResult<EventDetailDto>
                     .Failure(
                         "No se puede editar un evento cancelado.");
             }
 
-            if (eventEntity.Status == EventStatus.Finished)
+            if (eventEntity.Status ==
+                EventStatus.Finished)
             {
                 return ServiceResult<EventDetailDto>
                     .Failure(
                         "No se puede editar un evento finalizado.");
             }
 
-            var categoryExists = await _context.EventCategories
-                .AnyAsync(c =>
-                    c.Id == dto.EventCategoryId &&
-                    c.IsActive);
+            var categoryExists =
+                await _context.EventCategories
+                    .AnyAsync(c =>
+                        c.Id == dto.EventCategoryId &&
+                        c.IsActive);
 
             if (!categoryExists)
             {
@@ -217,9 +275,12 @@ namespace Evently.Api.Services
             }
 
             var newEventDateTime =
-                dto.Date.Date + dto.StartTime;
+                dto.Date.Date +
+                dto.StartTime;
 
-            if (eventEntity.Status == EventStatus.Published &&
+            if (
+                eventEntity.Status ==
+                    EventStatus.Published &&
                 newEventDateTime <= DateTime.Now)
             {
                 return ServiceResult<EventDetailDto>
@@ -227,14 +288,29 @@ namespace Evently.Api.Services
                         "Un evento publicado debe tener una fecha y hora futura.");
             }
 
-            eventEntity.Title = dto.Title.Trim();
-            eventEntity.Description = dto.Description.Trim();
-            eventEntity.Date = dto.Date.Date;
-            eventEntity.StartTime = dto.StartTime;
-            eventEntity.Location = dto.Location.Trim();
-            eventEntity.Capacity = dto.Capacity;
-            eventEntity.ImageUrl = dto.ImageUrl;
-            eventEntity.EventCategoryId = dto.EventCategoryId;
+            eventEntity.Title =
+                dto.Title.Trim();
+
+            eventEntity.Description =
+                dto.Description.Trim();
+
+            eventEntity.Date =
+                dto.Date.Date;
+
+            eventEntity.StartTime =
+                dto.StartTime;
+
+            eventEntity.Location =
+                dto.Location.Trim();
+
+            eventEntity.Capacity =
+                dto.Capacity;
+
+            eventEntity.ImageUrl =
+                dto.ImageUrl;
+
+            eventEntity.EventCategoryId =
+                dto.EventCategoryId;
 
             await _context.SaveChangesAsync();
 
@@ -251,15 +327,18 @@ namespace Evently.Api.Services
         // PUBLISH
         // =====================================================
 
-        public async Task<ServiceResult<EventDetailDto>> PublishAsync(
-            int id,
-            int organizerId)
+        public async Task<ServiceResult<EventDetailDto>>
+            PublishAsync(
+                int id,
+                int organizerId)
         {
-            var eventEntity = await _context.Events
-                .Include(e => e.EventCategory)
-                .FirstOrDefaultAsync(e =>
-                    e.Id == id &&
-                    e.OrganizerId == organizerId);
+            var eventEntity =
+                await _context.Events
+                    .Include(e =>
+                        e.EventCategory)
+                    .FirstOrDefaultAsync(e =>
+                        e.Id == id &&
+                        e.OrganizerId == organizerId);
 
             if (eventEntity is null)
             {
@@ -268,7 +347,8 @@ namespace Evently.Api.Services
                         "El evento no existe o no pertenece al usuario.");
             }
 
-            if (eventEntity.Status != EventStatus.Draft)
+            if (eventEntity.Status !=
+                EventStatus.Draft)
             {
                 return ServiceResult<EventDetailDto>
                     .Failure(
@@ -311,14 +391,16 @@ namespace Evently.Api.Services
         // CANCEL
         // =====================================================
 
-        public async Task<ServiceResult<EventDetailDto>> CancelAsync(
-            int id,
-            int organizerId)
+        public async Task<ServiceResult<EventDetailDto>>
+            CancelAsync(
+                int id,
+                int organizerId)
         {
-            var eventEntity = await _context.Events
-                .FirstOrDefaultAsync(e =>
-                    e.Id == id &&
-                    e.OrganizerId == organizerId);
+            var eventEntity =
+                await _context.Events
+                    .FirstOrDefaultAsync(e =>
+                        e.Id == id &&
+                        e.OrganizerId == organizerId);
 
             if (eventEntity is null)
             {
@@ -327,7 +409,8 @@ namespace Evently.Api.Services
                         "El evento no existe o no pertenece al usuario.");
             }
 
-            if (eventEntity.Status != EventStatus.Published)
+            if (eventEntity.Status !=
+                EventStatus.Published)
             {
                 return ServiceResult<EventDetailDto>
                     .Failure(
