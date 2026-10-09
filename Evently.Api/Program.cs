@@ -78,6 +78,16 @@ builder.Services.AddScoped<
     IAdminService,
     AdminService>();
 
+builder.Services.AddHttpClient<
+    IEmailService,
+    BrevoEmailService>(
+        client =>
+        {
+            client.BaseAddress =
+                new Uri(
+                    "https://api.brevo.com/v3/");
+        });
+
 var jwtSettings =
     builder.Configuration.GetSection("Jwt");
 

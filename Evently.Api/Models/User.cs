@@ -6,22 +6,36 @@ namespace Evently.Api.Models
     {
         public int Id { get; set; }
 
-        public string FirstName { get; set; } = string.Empty;
+        public string FirstName { get; set; }
+            = string.Empty;
 
-        public string LastName { get; set; } = string.Empty;
+        public string LastName { get; set; }
+            = string.Empty;
 
-        public string Email { get; set; } = string.Empty;
+        public string Email { get; set; }
+            = string.Empty;
 
-        public string PasswordHash { get; set; } = string.Empty;
+        public string PasswordHash { get; set; }
+            = string.Empty;
 
-        public UserRole Role { get; set; } = UserRole.User;
+        public UserRole Role { get; set; }
+            = UserRole.User;
 
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
+            = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+            = DateTime.UtcNow;
 
-        public ICollection<Event> Events { get; set; } = new List<Event>();
+        public ICollection<Event> Events { get; set; }
+            = new List<Event>();
+
         public ICollection<Ticket> Tickets { get; set; }
-    = new List<Ticket>();
+            = new List<Ticket>();
+
+        public ICollection<PasswordResetToken>
+            PasswordResetTokens
+        { get; set; }
+                = new List<PasswordResetToken>();
     }
 }
