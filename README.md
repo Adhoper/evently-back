@@ -79,7 +79,7 @@ Los enlaces:
 La API es consumida por un frontend desarrollado con **React + TypeScript**.
 
 🔗 **Aplicación:**  
-`Agregar aquí el enlace del frontend cuando esté publicado`
+[Evently](https://eventlyfront.netlify.app)
 
 ---
 
