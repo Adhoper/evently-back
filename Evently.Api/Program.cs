@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -96,6 +97,10 @@ var jwtKey =
     ?? throw new InvalidOperationException(
         "JWT Key no está configurada.");
 
+var frontendUrl =
+    builder.Configuration["Frontend:BaseUrl"]
+        ?.TrimEnd('/');
+
 builder.Services
     .AddAuthentication(options =>
     {
@@ -114,35 +119,81 @@ builder.Services
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-                ClockSkew = TimeSpan.Zero
+
+                ValidIssuer =
+                    jwtSettings["Issuer"],
+
+                ValidAudience =
+                    jwtSettings["Audience"],
+
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            jwtKey)),
+
+                ClockSkew =
+                    TimeSpan.Zero
             };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = async context =>
+        options.Events =
+            new JwtBearerEvents
             {
-                var userIdValue = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                var tokenRole = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                OnTokenValidated =
+                    async context =>
+                    {
+                        var userIdValue =
+                            context.Principal?
+                                .FindFirst(
+                                    ClaimTypes
+                                        .NameIdentifier)?
+                                .Value;
 
-                if (!int.TryParse(userIdValue, out var userId))
-                {
-                    context.Fail("Token inválido.");
-                    return;
-                }
+                        var tokenRole =
+                            context.Principal?
+                                .FindFirst(
+                                    ClaimTypes.Role)?
+                                .Value;
 
-                var dbContext = context.HttpContext.RequestServices.GetRequiredService<EventlyDbContext>();
-                var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+                        if (!int.TryParse(
+                                userIdValue,
+                                out var userId))
+                        {
+                            context.Fail(
+                                "Token inválido.");
 
-                if (user is null || !user.IsActive || !string.Equals(user.Role.ToString(), tokenRole, StringComparison.Ordinal))
-                {
-                    context.Fail("La sesión ya no es válida.");
-                }
-            }
-        };
+                            return;
+                        }
+
+                        var dbContext =
+                            context.HttpContext
+                                .RequestServices
+                                .GetRequiredService<
+                                    EventlyDbContext>();
+
+                        var user =
+                            await dbContext.Users
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(
+                                    u =>
+                                        u.Id ==
+                                        userId);
+
+                        if (
+                            user is null ||
+                            !user.IsActive ||
+                            !string.Equals(
+                                user.Role.ToString(),
+                                tokenRole,
+                                StringComparison.Ordinal))
+                        {
+                            context.Fail(
+                                "La sesión ya no es válida.");
+                        }
+                    }
+            };
     });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -150,15 +201,29 @@ builder.Services.AddCors(options =>
         "Frontend",
         policy =>
         {
+            var allowedOrigins =
+                new List<string>
+                {
+                    "http://localhost:5173"
+                };
+
+            if (!string.IsNullOrWhiteSpace(
+                    frontendUrl))
+            {
+                allowedOrigins.Add(
+                    frontendUrl);
+            }
+
             policy
                 .WithOrigins(
-                    "http://localhost:5173")
+                    allowedOrigins.ToArray())
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
 });
 
-var app = builder.Build();
+var app =
+    builder.Build();
 
 var webRootPath =
     Path.Combine(
@@ -174,17 +239,14 @@ var eventUploadsPath =
 Directory.CreateDirectory(
     eventUploadsPath);
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
+app.UseSwagger();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/swagger/v1/swagger.json",
-            "Evently API v1");
-    });
-}
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "Evently API v1");
+});
 
 app.UseHttpsRedirection();
 
@@ -198,12 +260,19 @@ app.UseStaticFiles(
         RequestPath = ""
     });
 
-app.UseCors("Frontend");
+app.UseCors(
+    "Frontend");
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet(
+    "/",
+    () =>
+        Results.Redirect(
+            "/swagger"));
 
 app.Run();
