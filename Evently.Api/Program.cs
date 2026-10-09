@@ -3,6 +3,7 @@ using Evently.Api.Services;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -28,13 +29,6 @@ builder.Services.AddControllers();
 // ============================================================
 
 builder.Services.AddEndpointsApiExplorer();
-// ======================================================
-// SWAGGER / OPENAPI
-// ======================================================
-
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -53,7 +47,9 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(document =>
         new OpenApiSecurityRequirement
         {
-            [new OpenApiSecuritySchemeReference("Bearer", document)] =
+            [new OpenApiSecuritySchemeReference(
+                "Bearer",
+                document)] =
                 new List<string>()
         });
 });
@@ -62,21 +58,47 @@ builder.Services.AddSwaggerGen(options =>
 // SERVICES
 // ============================================================
 
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<
+    ICategoryService,
+    CategoryService>();
+
+builder.Services.AddScoped<
+    IEventService,
+    EventService>();
+
+builder.Services.AddScoped<
+    ITokenService,
+    TokenService>();
+
+builder.Services.AddScoped<
+    IAuthService,
+    AuthService>();
+
+builder.Services.AddScoped<
+    IUserService,
+    UserService>();
+
+builder.Services.AddScoped<
+    ITicketService,
+    TicketService>();
+
+builder.Services.AddScoped<
+    IOrganizerService,
+    OrganizerService>();
+
+builder.Services.AddScoped<
+    IEventImageService,
+    EventImageService>();
 
 // ============================================================
 // JWT AUTHENTICATION
 // ============================================================
 
+var jwtSettings =
+    builder.Configuration.GetSection("Jwt");
 
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-
-var jwtKey = jwtSettings["Key"]
+var jwtKey =
+    jwtSettings["Key"]
     ?? throw new InvalidOperationException(
         "JWT Key no está configurada.");
 
@@ -99,29 +121,69 @@ builder.Services
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
 
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
+                ValidIssuer =
+                    jwtSettings["Issuer"],
+
+                ValidAudience =
+                    jwtSettings["Audience"],
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtKey)),
+                        Encoding.UTF8.GetBytes(
+                            jwtKey)),
 
-                ClockSkew = TimeSpan.Zero
+                ClockSkew =
+                    TimeSpan.Zero
             };
     });
 
+// ============================================================
+// CORS
+// ============================================================
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+    options.AddPolicy(
+        "Frontend",
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
+// ============================================================
+// BUILD APP
+// ============================================================
+
 var app = builder.Build();
+
+// ============================================================
+// UPLOAD DIRECTORIES
+// ============================================================
+
+/*
+ * Creamos wwwroot/uploads/events al iniciar la API.
+ *
+ * Esto garantiza que el directorio físico exista ANTES
+ * de configurar el middleware que sirve archivos estáticos.
+ */
+var webRootPath =
+    Path.Combine(
+        app.Environment.ContentRootPath,
+        "wwwroot");
+
+var eventUploadsPath =
+    Path.Combine(
+        webRootPath,
+        "uploads",
+        "events");
+
+Directory.CreateDirectory(
+    eventUploadsPath);
 
 // ============================================================
 // HTTP REQUEST PIPELINE
@@ -133,11 +195,39 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Evently API v1");
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "Evently API v1");
     });
 }
 
 app.UseHttpsRedirection();
+
+// ============================================================
+// STATIC FILES
+// ============================================================
+
+/*
+ * Servimos explícitamente los archivos contenidos
+ * en nuestra carpeta wwwroot.
+ *
+ * Ejemplo:
+ *
+ * wwwroot/uploads/events/imagen.jpg
+ *
+ * será accesible mediante:
+ *
+ * https://localhost:7109/uploads/events/imagen.jpg
+ */
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider =
+            new PhysicalFileProvider(
+                webRootPath),
+
+        RequestPath = ""
+    });
 
 app.UseCors("Frontend");
 

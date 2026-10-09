@@ -196,7 +196,7 @@ namespace Evently.Api.Services
                 StartTime = dto.StartTime,
                 Location = dto.Location.Trim(),
                 Capacity = dto.Capacity,
-                ImageUrl = dto.ImageUrl,
+                ImageUrl = null,
 
                 Status = EventStatus.Draft,
 
@@ -288,6 +288,19 @@ namespace Evently.Api.Services
                         "Un evento publicado debe tener una fecha y hora futura.");
             }
 
+            var occupiedSpots =
+    await _context.Tickets
+        .CountAsync(t =>
+            t.EventId == id &&
+            t.Status != TicketStatus.Cancelled);
+
+            if (dto.Capacity < occupiedSpots)
+            {
+                return ServiceResult<EventDetailDto>
+                    .Failure(
+                        $"La capacidad no puede ser menor que las {occupiedSpots} entradas activas.");
+            }
+
             eventEntity.Title =
                 dto.Title.Trim();
 
@@ -305,9 +318,6 @@ namespace Evently.Api.Services
 
             eventEntity.Capacity =
                 dto.Capacity;
-
-            eventEntity.ImageUrl =
-                dto.ImageUrl;
 
             eventEntity.EventCategoryId =
                 dto.EventCategoryId;
@@ -415,6 +425,15 @@ namespace Evently.Api.Services
                 return ServiceResult<EventDetailDto>
                     .Failure(
                         "Solo los eventos publicados pueden cancelarse.");
+            }
+
+            foreach (var ticket in eventEntity.Tickets)
+            {
+                if (ticket.Status == TicketStatus.Reserved)
+                {
+                    ticket.Status =
+                        TicketStatus.Cancelled;
+                }
             }
 
             eventEntity.Status =
