@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Evently.Api.DTOs.Categories
+namespace Evently.Api.DTOs.Admin
 {
-    public class CreateCategoryDto
+    public class UpdateCategoryDto
     {
         [Required]
         [MaxLength(100)]

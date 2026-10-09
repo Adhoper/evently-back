@@ -1,4 +1,4 @@
-﻿using Evently.Api.Models;
+using Evently.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Evently.Api.Data

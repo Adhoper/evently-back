@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Tickets;
+using Evently.Api.DTOs.Tickets;
 using Evently.Api.Extensions;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -19,10 +19,6 @@ namespace Evently.Api.Controllers
             _ticketService = ticketService;
         }
 
-        // =====================================================
-        // MY TICKETS
-        // =====================================================
-
         [HttpGet("mine")]
         public async Task<ActionResult<List<TicketDto>>> GetMine()
         {
@@ -35,10 +31,6 @@ namespace Evently.Api.Controllers
 
             return Ok(tickets);
         }
-
-        // =====================================================
-        // MY TICKET DETAIL
-        // =====================================================
 
         [HttpGet("mine/{id:int}")]
         public async Task<ActionResult<TicketDto>> GetMineById(
@@ -63,10 +55,6 @@ namespace Evently.Api.Controllers
 
             return Ok(result.Data);
         }
-
-        // =====================================================
-        // RESERVE
-        // =====================================================
 
         [HttpPost("events/{eventId:int}/reserve")]
         public async Task<ActionResult<TicketDto>> Reserve(
@@ -101,10 +89,6 @@ namespace Evently.Api.Controllers
             return Ok(result.Data);
         }
 
-        // =====================================================
-        // CANCEL
-        // =====================================================
-
         [HttpPatch("{id:int}/cancel")]
         public async Task<ActionResult<TicketDto>> Cancel(
             int id)
@@ -137,10 +121,6 @@ namespace Evently.Api.Controllers
 
             return Ok(result.Data);
         }
-
-        // =====================================================
-        // CHECK-IN
-        // =====================================================
 
         [HttpPost("check-in")]
         [Authorize(Roles = "Organizer")]

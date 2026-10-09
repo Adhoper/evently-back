@@ -1,4 +1,4 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.Models.Enums;
 using Evently.Api.Services.Interfaces;
 using Evently.Api.Services.Results;
@@ -48,19 +48,12 @@ namespace Evently.Api.Services
             _environment = environment;
         }
 
-        // =====================================================
-        // UPLOAD / REPLACE
-        // =====================================================
-
         public async Task<ServiceResult<string>>
             UploadAsync(
                 int eventId,
                 int organizerId,
                 IFormFile file)
         {
-            // =================================================
-            // EVENT
-            // =================================================
 
             var eventEntity =
                 await _context.Events
@@ -85,10 +78,6 @@ namespace Evently.Api.Services
                     .Failure(
                         "No se puede modificar la imagen de este evento.");
             }
-
-            // =================================================
-            // FILE VALIDATION
-            // =================================================
 
             if (
                 file is null ||
@@ -137,10 +126,6 @@ namespace Evently.Api.Services
                         "El tipo del archivo seleccionado no es válido.");
             }
 
-            // =================================================
-            // DIRECTORY
-            // =================================================
-
             var webRootPath =
                 _environment.WebRootPath;
 
@@ -162,10 +147,6 @@ namespace Evently.Api.Services
 
             Directory.CreateDirectory(
                 uploadsDirectory);
-
-            // =================================================
-            // NEW FILE
-            // =================================================
 
             var fileName =
                 $"{Guid.NewGuid():N}{extension}";
@@ -195,10 +176,6 @@ namespace Evently.Api.Services
                         stream);
                 }
 
-                // =============================================
-                // SAVE PATH
-                // =============================================
-
                 eventEntity.ImageUrl =
                     relativePath;
 
@@ -214,10 +191,6 @@ namespace Evently.Api.Services
 
                     throw;
                 }
-
-                // =============================================
-                // DELETE PREVIOUS FILE
-                // =============================================
 
                 if (
                     !string.IsNullOrWhiteSpace(
@@ -247,18 +220,12 @@ namespace Evently.Api.Services
                     }
                     catch
                     {
-                        // Si la limpieza falla,
-                        // no ocultamos el error original.
                     }
                 }
 
                 throw;
             }
         }
-
-        // =====================================================
-        // REMOVE
-        // =====================================================
 
         public async Task<ServiceResult<string>>
             RemoveAsync(
@@ -288,9 +255,6 @@ namespace Evently.Api.Services
                     .Failure(
                         "No se puede modificar la imagen de este evento.");
             }
-
-            // Si no tiene imagen, consideramos que
-            // la operación ya está completada.
             if (
                 string.IsNullOrWhiteSpace(
                     eventEntity.ImageUrl))
@@ -317,20 +281,10 @@ namespace Evently.Api.Services
                     "Imagen eliminada correctamente.");
         }
 
-        // =====================================================
-        // DELETE PHYSICAL FILE
-        // =====================================================
-
         private void DeletePhysicalImage(
             string imageUrl)
         {
-            /*
-             * Solo eliminamos archivos pertenecientes
-             * a nuestra carpeta de eventos.
-             *
-             * De esta manera tampoco intentamos
-             * eliminar antiguas URLs externas.
-             */
+            
             if (
                 string.IsNullOrWhiteSpace(
                     imageUrl) ||
@@ -385,12 +339,7 @@ namespace Evently.Api.Services
             }
             catch
             {
-                /*
-                 * La BD ya dejó de utilizar
-                 * la imagen, por lo que no
-                 * hacemos fallar la operación
-                 * si la limpieza física falla.
-                 */
+                
             }
         }
     }

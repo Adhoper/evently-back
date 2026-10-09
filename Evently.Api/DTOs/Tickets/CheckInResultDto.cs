@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.DTOs.Tickets
+namespace Evently.Api.DTOs.Tickets
 {
     public class CheckInResultDto
     {

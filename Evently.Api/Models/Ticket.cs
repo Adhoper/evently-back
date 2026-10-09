@@ -1,4 +1,4 @@
-﻿using Evently.Api.Models.Enums;
+using Evently.Api.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Evently.Api.Models
@@ -19,17 +19,9 @@ namespace Evently.Api.Models
 
         public DateTime? CheckedInAt { get; set; }
 
-        // =====================================================
-        // EVENT
-        // =====================================================
-
         public int EventId { get; set; }
 
         public Event Event { get; set; } = null!;
-
-        // =====================================================
-        // USER
-        // =====================================================
 
         public int UserId { get; set; }
 

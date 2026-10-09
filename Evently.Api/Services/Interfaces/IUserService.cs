@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Auth;
+using Evently.Api.DTOs.Auth;
 using Evently.Api.Services.Results;
 
 namespace Evently.Api.Services.Interfaces

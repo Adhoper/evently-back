@@ -1,4 +1,4 @@
-﻿using Evently.Api.Models;
+using Evently.Api.Models;
 
 namespace Evently.Api.Services.Interfaces
 {

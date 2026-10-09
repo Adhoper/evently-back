@@ -1,4 +1,4 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.DTOs.Auth;
 using Evently.Api.Models;
 using Evently.Api.Models.Enums;

@@ -1,4 +1,4 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.DTOs.Tickets;
 using Evently.Api.Models;
 using Evently.Api.Models.Enums;
@@ -18,10 +18,6 @@ namespace Evently.Api.Services
         {
             _context = context;
         }
-
-        // =====================================================
-        // MY TICKETS
-        // =====================================================
 
         public async Task<List<TicketDto>> GetMineAsync(
             int userId)
@@ -50,10 +46,6 @@ namespace Evently.Api.Services
                 })
                 .ToListAsync();
         }
-
-        // =====================================================
-        // MY TICKET DETAIL
-        // =====================================================
 
         public async Task<ServiceResult<TicketDto>>
             GetMineByIdAsync(
@@ -96,18 +88,11 @@ namespace Evently.Api.Services
                 .Ok(ticket);
         }
 
-        // =====================================================
-        // RESERVE
-        // =====================================================
-
         public async Task<ServiceResult<TicketDto>> ReserveAsync(
             int eventId,
             int userId)
         {
-            /*
-             * Serializable evita que dos usuarios puedan
-             * ocupar simultáneamente el último cupo disponible.
-             */
+            
             await using var transaction =
                 await _context.Database.BeginTransactionAsync(
                     IsolationLevel.Serializable);
@@ -186,11 +171,7 @@ namespace Evently.Api.Services
 
             if (existingTicket is not null)
             {
-                /*
-                 * Si el usuario había cancelado anteriormente,
-                 * reutilizamos el registro pero generamos un
-                 * código nuevo para invalidar el QR anterior.
-                 */
+                
 
                 existingTicket.Status =
                     TicketStatus.Reserved;
@@ -264,10 +245,6 @@ namespace Evently.Api.Services
                 .Ok(savedTicket);
         }
 
-        // =====================================================
-        // CANCEL RESERVATION
-        // =====================================================
-
         public async Task<ServiceResult<TicketDto>> CancelAsync(
             int ticketId,
             int userId)
@@ -323,10 +300,6 @@ namespace Evently.Api.Services
                 userId);
         }
 
-        // =====================================================
-        // CHECK-IN
-        // =====================================================
-
         public async Task<ServiceResult<CheckInResultDto>>
             CheckInAsync(
                 string code,
@@ -350,10 +323,7 @@ namespace Evently.Api.Services
                         "La entrada no existe.");
             }
 
-            /*
-             * El organizador solamente puede validar
-             * entradas de SUS propios eventos.
-             */
+            
             if (ticket.Event.OrganizerId !=
                 organizerId)
             {
@@ -425,10 +395,6 @@ namespace Evently.Api.Services
             return ServiceResult<CheckInResultDto>
                 .Ok(response);
         }
-
-        // =====================================================
-        // CODE GENERATOR
-        // =====================================================
 
         private static string GenerateTicketCode()
         {

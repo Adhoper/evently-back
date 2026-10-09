@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Events;
+using Evently.Api.DTOs.Events;
 using Evently.Api.Extensions;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -17,12 +17,6 @@ namespace Evently.Api.Controllers
         {
             _eventService = eventService;
         }
-
-        // =====================================================
-        // PUBLIC
-        // =====================================================
-
-        // Devuelve únicamente eventos publicados.
         [HttpGet]
         public async Task<ActionResult<List<EventDto>>> GetAll()
         {
@@ -31,9 +25,6 @@ namespace Evently.Api.Controllers
 
             return Ok(events);
         }
-
-        // Devuelve el detalle de un evento únicamente
-        // si está publicado.
         [HttpGet("{id:int}")]
         public async Task<ActionResult<EventDetailDto>> GetById(
             int id)
@@ -51,13 +42,6 @@ namespace Evently.Api.Controllers
 
             return Ok(eventItem);
         }
-
-        // =====================================================
-        // ORGANIZER - MY EVENTS
-        // =====================================================
-
-        // Devuelve todos los eventos pertenecientes al
-        // organizador autenticado.
         [HttpGet("mine")]
         [Authorize(Roles = "Organizer")]
         public async Task<ActionResult<List<EventDto>>> GetMine()
@@ -71,9 +55,6 @@ namespace Evently.Api.Controllers
 
             return Ok(events);
         }
-
-        // Devuelve un evento específico solamente si
-        // pertenece al organizador autenticado.
         [HttpGet("mine/{id:int}")]
         [Authorize(Roles = "Organizer")]
         public async Task<ActionResult<EventDetailDto>>
@@ -99,10 +80,6 @@ namespace Evently.Api.Controllers
             return Ok(eventItem);
         }
 
-        // =====================================================
-        // CREATE
-        // =====================================================
-
         [HttpPost]
         [Authorize(Roles = "Organizer")]
         public async Task<ActionResult<EventDetailDto>> Create(
@@ -124,18 +101,11 @@ namespace Evently.Api.Controllers
                         "La categoría seleccionada no existe o está inactiva."
                 });
             }
-
-            // Como el evento recién creado es Draft,
-            // apuntamos al endpoint privado del organizador.
             return CreatedAtAction(
                 nameof(GetMineById),
                 new { id = eventItem.Id },
                 eventItem);
         }
-
-        // =====================================================
-        // UPDATE
-        // =====================================================
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Organizer")]
@@ -171,10 +141,6 @@ namespace Evently.Api.Controllers
             return Ok(result.Data);
         }
 
-        // =====================================================
-        // PUBLISH
-        // =====================================================
-
         [HttpPatch("{id:int}/publish")]
         [Authorize(Roles = "Organizer")]
         public async Task<ActionResult<EventDetailDto>> Publish(
@@ -206,10 +172,6 @@ namespace Evently.Api.Controllers
 
             return Ok(result.Data);
         }
-
-        // =====================================================
-        // CANCEL
-        // =====================================================
 
         [HttpPatch("{id:int}/cancel")]
         [Authorize(Roles = "Organizer")]

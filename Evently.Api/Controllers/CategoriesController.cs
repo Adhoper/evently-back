@@ -1,5 +1,4 @@
-﻿using Evently.Api.DTOs.Categories;
-using Evently.Api.Services;
+using Evently.Api.DTOs.Categories;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,9 +18,7 @@ namespace Evently.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CategoryDto>>> GetAll()
         {
-            var categories = await _categoryService.GetAllAsync();
-
-            return Ok(categories);
+            return Ok(await _categoryService.GetAllAsync());
         }
 
         [HttpGet("{id:int}")]
@@ -35,18 +32,6 @@ namespace Evently.Api.Controllers
             }
 
             return Ok(category);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<CategoryDto>> Create(
-            CreateCategoryDto dto)
-        {
-            var category = await _categoryService.CreateAsync(dto);
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = category.Id },
-                category);
         }
     }
 }

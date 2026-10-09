@@ -1,4 +1,4 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.DTOs.Events;
 using Evently.Api.Models;
 using Evently.Api.Models.Enums;
@@ -16,10 +16,6 @@ namespace Evently.Api.Services
         {
             _context = context;
         }
-
-        // =====================================================
-        // PUBLIC
-        // =====================================================
 
         public async Task<List<EventDto>> GetPublicAsync()
         {
@@ -43,10 +39,6 @@ namespace Evently.Api.Services
                 })
                 .ToListAsync();
         }
-
-        // =====================================================
-        // PUBLIC - DETAIL
-        // =====================================================
 
         public async Task<EventDetailDto?> GetPublicByIdAsync(
             int id)
@@ -72,10 +64,6 @@ namespace Evently.Api.Services
                     EventCategoryId = e.EventCategoryId,
                     CategoryName = e.EventCategory.Name,
 
-                    // =========================================
-                    // TICKET AVAILABILITY
-                    // =========================================
-
                     ReservedCount = e.Tickets.Count(t =>
                         t.Status != TicketStatus.Cancelled),
 
@@ -91,10 +79,6 @@ namespace Evently.Api.Services
                 })
                 .FirstOrDefaultAsync();
         }
-
-        // =====================================================
-        // ORGANIZER - MY EVENTS
-        // =====================================================
 
         public async Task<List<EventDto>> GetMineAsync(
             int organizerId)
@@ -119,10 +103,6 @@ namespace Evently.Api.Services
                 })
                 .ToListAsync();
         }
-
-        // =====================================================
-        // ORGANIZER - MY EVENT DETAIL
-        // =====================================================
 
         public async Task<EventDetailDto?> GetMineByIdAsync(
             int id,
@@ -149,10 +129,6 @@ namespace Evently.Api.Services
                     EventCategoryId = e.EventCategoryId,
                     CategoryName = e.EventCategory.Name,
 
-                    // =========================================
-                    // TICKET AVAILABILITY
-                    // =========================================
-
                     ReservedCount = e.Tickets.Count(t =>
                         t.Status != TicketStatus.Cancelled),
 
@@ -168,10 +144,6 @@ namespace Evently.Api.Services
                 })
                 .FirstOrDefaultAsync();
         }
-
-        // =====================================================
-        // CREATE
-        // =====================================================
 
         public async Task<EventDetailDto?> CreateAsync(
             CreateEventDto dto,
@@ -204,9 +176,6 @@ namespace Evently.Api.Services
 
                 EventCategoryId =
                     dto.EventCategoryId,
-
-                // El OrganizerId viene del usuario autenticado
-                // mediante el JWT.
                 OrganizerId = organizerId
             };
 
@@ -214,17 +183,10 @@ namespace Evently.Api.Services
                 eventEntity);
 
             await _context.SaveChangesAsync();
-
-            // El evento nace como Draft, por lo tanto
-            // no utilizamos GetPublicByIdAsync.
             return await GetMineByIdAsync(
                 eventEntity.Id,
                 organizerId);
         }
-
-        // =====================================================
-        // UPDATE
-        // =====================================================
 
         public async Task<ServiceResult<EventDetailDto>>
             UpdateAsync(
@@ -333,10 +295,6 @@ namespace Evently.Api.Services
                 .Ok(updatedEvent!);
         }
 
-        // =====================================================
-        // PUBLISH
-        // =====================================================
-
         public async Task<ServiceResult<EventDetailDto>>
             PublishAsync(
                 int id,
@@ -397,10 +355,6 @@ namespace Evently.Api.Services
                 .Ok(publishedEvent!);
         }
 
-        // =====================================================
-        // CANCEL
-        // =====================================================
-
         public async Task<ServiceResult<EventDetailDto>>
             CancelAsync(
                 int id,
@@ -408,6 +362,7 @@ namespace Evently.Api.Services
         {
             var eventEntity =
                 await _context.Events
+                    .Include(e => e.Tickets)
                     .FirstOrDefaultAsync(e =>
                         e.Id == id &&
                         e.OrganizerId == organizerId);

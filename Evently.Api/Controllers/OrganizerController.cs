@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Organizer;
+using Evently.Api.DTOs.Organizer;
 using Evently.Api.Extensions;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -20,10 +20,6 @@ namespace Evently.Api.Controllers
                 organizerService;
         }
 
-        // =====================================================
-        // DASHBOARD
-        // =====================================================
-
         [HttpGet("dashboard")]
         public async Task<ActionResult<OrganizerDashboardDto>>
             GetDashboard()
@@ -38,10 +34,6 @@ namespace Evently.Api.Controllers
 
             return Ok(dashboard);
         }
-
-        // =====================================================
-        // EVENT ATTENDEES
-        // =====================================================
 
         [HttpGet("events/{eventId:int}/attendees")]
         public async Task<ActionResult<EventAttendeesDto>>

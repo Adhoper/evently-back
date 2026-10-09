@@ -1,4 +1,4 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.DTOs.Organizer;
 using Evently.Api.Models.Enums;
 using Evently.Api.Services.Interfaces;
@@ -17,16 +17,9 @@ namespace Evently.Api.Services
             _context = context;
         }
 
-        // =====================================================
-        // DASHBOARD
-        // =====================================================
-
         public async Task<OrganizerDashboardDto> GetDashboardAsync(
             int organizerId)
         {
-            // =================================================
-            // EVENTS
-            // =================================================
 
             var events = await _context.Events
                 .AsNoTracking()
@@ -45,9 +38,6 @@ namespace Evently.Api.Services
             {
                 return new OrganizerDashboardDto();
             }
-
-            // Eventos que realmente pueden tener
-            // asistencia/reservas activas.
             var activeEvents = events
                 .Where(e =>
                     e.Status == EventStatus.Published ||
@@ -57,10 +47,6 @@ namespace Evently.Api.Services
             var activeEventIds = activeEvents
                 .Select(e => e.Id)
                 .ToList();
-
-            // =================================================
-            // TICKETS
-            // =================================================
 
             var tickets = await _context.Tickets
                 .AsNoTracking()
@@ -74,10 +60,6 @@ namespace Evently.Api.Services
                 })
                 .ToListAsync();
 
-            // =================================================
-            // BASIC COUNTS
-            // =================================================
-
             var totalReservations =
                 tickets.Count;
 
@@ -88,10 +70,6 @@ namespace Evently.Api.Services
             var totalCapacity =
                 activeEvents.Sum(e =>
                     e.Capacity);
-
-            // =================================================
-            // RATES
-            // =================================================
 
             var attendanceRate =
                 totalReservations > 0
@@ -110,10 +88,6 @@ namespace Evently.Api.Services
                         100,
                         2)
                     : 0;
-
-            // =================================================
-            // TOP EVENT
-            // =================================================
 
             TopEventDto? topEvent =
                 null;
@@ -178,10 +152,6 @@ namespace Evently.Api.Services
                 }
             }
 
-            // =================================================
-            // RESPONSE
-            // =================================================
-
             return new OrganizerDashboardDto
             {
                 TotalEvents =
@@ -227,18 +197,11 @@ namespace Evently.Api.Services
             };
         }
 
-        // =====================================================
-        // EVENT ATTENDEES
-        // =====================================================
-
         public async Task<ServiceResult<EventAttendeesDto>>
             GetEventAttendeesAsync(
                 int eventId,
                 int organizerId)
         {
-            // =================================================
-            // EVENT OWNERSHIP
-            // =================================================
 
             var eventEntity =
                 await _context.Events
@@ -264,10 +227,6 @@ namespace Evently.Api.Services
                     .Missing(
                         "El evento no existe o no pertenece al organizador.");
             }
-
-            // =================================================
-            // ATTENDEES
-            // =================================================
 
             var attendees =
                 await _context.Tickets
@@ -303,10 +262,6 @@ namespace Evently.Api.Services
                                 t.CheckedInAt
                         })
                     .ToListAsync();
-
-            // =================================================
-            // STATISTICS
-            // =================================================
 
             var reservedCount =
                 attendees.Count(a =>
@@ -346,10 +301,6 @@ namespace Evently.Api.Services
                         100,
                         2)
                     : 0;
-
-            // =================================================
-            // RESPONSE
-            // =================================================
 
             var response =
                 new EventAttendeesDto

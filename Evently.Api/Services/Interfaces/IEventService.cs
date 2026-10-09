@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Events;
+using Evently.Api.DTOs.Events;
 using Evently.Api.Services.Results;
 
 namespace Evently.Api.Services.Interfaces

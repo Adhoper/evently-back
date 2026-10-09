@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.Models.Enums
+namespace Evently.Api.Models.Enums
 {
     public enum UserRole
     {

@@ -1,6 +1,5 @@
-﻿using Evently.Api.Data;
+using Evently.Api.Data;
 using Evently.Api.DTOs.Categories;
-using Evently.Api.Models;
 using Evently.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +18,7 @@ namespace Evently.Api.Services
         {
             return await _context.EventCategories
                 .AsNoTracking()
+                .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
                 .Select(c => new CategoryDto
                 {
@@ -33,7 +33,7 @@ namespace Evently.Api.Services
         {
             return await _context.EventCategories
                 .AsNoTracking()
-                .Where(c => c.Id == id)
+                .Where(c => c.Id == id && c.IsActive)
                 .Select(c => new CategoryDto
                 {
                     Id = c.Id,
@@ -41,26 +41,6 @@ namespace Evently.Api.Services
                     IsActive = c.IsActive
                 })
                 .FirstOrDefaultAsync();
-        }
-
-        public async Task<CategoryDto> CreateAsync(CreateCategoryDto dto)
-        {
-            var category = new EventCategory
-            {
-                Name = dto.Name.Trim(),
-                IsActive = true
-            };
-
-            _context.EventCategories.Add(category);
-
-            await _context.SaveChangesAsync();
-
-            return new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                IsActive = category.IsActive
-            };
         }
     }
 }

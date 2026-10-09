@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.DTOs.Auth
+namespace Evently.Api.DTOs.Auth
 {
     public class AuthResponseDto
     {

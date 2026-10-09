@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.DTOs.Events
+namespace Evently.Api.DTOs.Events
 {
     public class EventDetailDto
     {

@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.DTOs.Organizer
+namespace Evently.Api.DTOs.Organizer
 {
     public class TopEventDto
     {

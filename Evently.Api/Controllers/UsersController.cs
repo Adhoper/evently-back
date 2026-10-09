@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Auth;
+using Evently.Api.DTOs.Auth;
 using Evently.Api.Extensions;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;

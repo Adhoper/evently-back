@@ -1,4 +1,4 @@
-﻿using Evently.Api.Services.Results;
+using Evently.Api.Services.Results;
 using Microsoft.AspNetCore.Http;
 
 namespace Evently.Api.Services.Interfaces

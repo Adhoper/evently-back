@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.Models
+namespace Evently.Api.Models
 {
     public class EventCategory
     {

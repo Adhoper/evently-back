@@ -10,23 +10,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// DATABASE
-// ============================================================
-
 builder.Services.AddDbContext<EventlyDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ============================================================
-// CONTROLLERS
-// ============================================================
-
 builder.Services.AddControllers();
-
-// ============================================================
-// SWAGGER / OPENAPI
-// ============================================================
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -53,10 +41,6 @@ builder.Services.AddSwaggerGen(options =>
                 new List<string>()
         });
 });
-
-// ============================================================
-// SERVICES
-// ============================================================
 
 builder.Services.AddScoped<
     ICategoryService,
@@ -90,9 +74,9 @@ builder.Services.AddScoped<
     IEventImageService,
     EventImageService>();
 
-// ============================================================
-// JWT AUTHENTICATION
-// ============================================================
+builder.Services.AddScoped<
+    IAdminService,
+    AdminService>();
 
 var jwtSettings =
     builder.Configuration.GetSection("Jwt");
@@ -120,26 +104,35 @@ builder.Services
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-
-                ValidIssuer =
-                    jwtSettings["Issuer"],
-
-                ValidAudience =
-                    jwtSettings["Audience"],
-
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            jwtKey)),
-
-                ClockSkew =
-                    TimeSpan.Zero
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                ClockSkew = TimeSpan.Zero
             };
-    });
 
-// ============================================================
-// CORS
-// ============================================================
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var userIdValue = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var tokenRole = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+                if (!int.TryParse(userIdValue, out var userId))
+                {
+                    context.Fail("Token inválido.");
+                    return;
+                }
+
+                var dbContext = context.HttpContext.RequestServices.GetRequiredService<EventlyDbContext>();
+                var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user is null || !user.IsActive || !string.Equals(user.Role.ToString(), tokenRole, StringComparison.Ordinal))
+                {
+                    context.Fail("La sesión ya no es válida.");
+                }
+            }
+        };
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -155,22 +148,8 @@ builder.Services.AddCors(options =>
         });
 });
 
-// ============================================================
-// BUILD APP
-// ============================================================
-
 var app = builder.Build();
 
-// ============================================================
-// UPLOAD DIRECTORIES
-// ============================================================
-
-/*
- * Creamos wwwroot/uploads/events al iniciar la API.
- *
- * Esto garantiza que el directorio físico exista ANTES
- * de configurar el middleware que sirve archivos estáticos.
- */
 var webRootPath =
     Path.Combine(
         app.Environment.ContentRootPath,
@@ -184,10 +163,6 @@ var eventUploadsPath =
 
 Directory.CreateDirectory(
     eventUploadsPath);
-
-// ============================================================
-// HTTP REQUEST PIPELINE
-// ============================================================
 
 if (app.Environment.IsDevelopment())
 {
@@ -203,22 +178,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ============================================================
-// STATIC FILES
-// ============================================================
-
-/*
- * Servimos explícitamente los archivos contenidos
- * en nuestra carpeta wwwroot.
- *
- * Ejemplo:
- *
- * wwwroot/uploads/events/imagen.jpg
- *
- * será accesible mediante:
- *
- * https://localhost:7109/uploads/events/imagen.jpg
- */
 app.UseStaticFiles(
     new StaticFileOptions
     {

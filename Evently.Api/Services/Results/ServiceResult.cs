@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.Services.Results
+namespace Evently.Api.Services.Results
 {
     public class ServiceResult<T> where T : class
     {

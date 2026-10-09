@@ -1,4 +1,4 @@
-﻿namespace Evently.Api.DTOs.Categories
+namespace Evently.Api.DTOs.Categories
 {
     public class CategoryDto
     {

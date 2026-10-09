@@ -1,4 +1,4 @@
-﻿using Evently.Api.DTOs.Events;
+using Evently.Api.DTOs.Events;
 using Evently.Api.Extensions;
 using Evently.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -18,10 +18,6 @@ namespace Evently.Api.Controllers
         {
             _eventImageService = eventImageService;
         }
-
-        // =====================================================
-        // UPLOAD / REPLACE
-        // =====================================================
 
         [HttpPost]
         [Consumes("multipart/form-data")]
@@ -67,10 +63,6 @@ namespace Evently.Api.Controllers
                         result.Data
                 });
         }
-
-        // =====================================================
-        // REMOVE
-        // =====================================================
 
         [HttpDelete]
         public async Task<IActionResult> Remove(

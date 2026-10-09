@@ -1,4 +1,4 @@
-﻿using Evently.Api.Models;
+using Evently.Api.Models;
 using Evently.Api.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

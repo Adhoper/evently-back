@@ -1,4 +1,4 @@
-﻿using Evently.Api.Models.Enums;
+using Evently.Api.Models.Enums;
 
 namespace Evently.Api.Models
 {
