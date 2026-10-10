@@ -6,9 +6,6 @@ El backend está desarrollado con **ASP.NET Core**, utiliza **Entity Framework C
 
 ## 🚀 API
 
-🔗 **API publicada:**  
-[Evently API](https://evently-api-ere0f4csdudkcvfe.centralus-01.azurewebsites.net)
-
 🔗 **Swagger:**  
 [Explorar endpoints](https://evently-api-ere0f4csdudkcvfe.centralus-01.azurewebsites.net/swagger)
 
