@@ -1,16 +1,16 @@
 # 🔌 Evently – API REST
 
-API REST desarrollada para **Evently**, encargada de gestionar usuarios, eventos, entradas, autenticación, check-in, estadísticas y administración de la plataforma.
+API REST desarrollada para **Evently**, encargada de gestionar la lógica de usuarios, eventos, entradas, reservas, check-in, estadísticas, administración y recuperación de contraseña.
 
-El backend fue desarrollado con **ASP.NET Core**, **Entity Framework Core** y **SQL Server**.
+El backend está desarrollado con **ASP.NET Core**, utiliza **Entity Framework Core + SQL Server** y se encuentra publicado en **Microsoft Azure**.
 
 ## 🚀 API
 
 🔗 **API publicada:**  
-`Agregar aquí el enlace cuando esté publicado`
+[Evently API](https://evently-api-ere0f4csdudkcvfe.centralus-01.azurewebsites.net)
 
 🔗 **Swagger:**  
-`Agregar aquí el enlace de Swagger cuando esté publicado`
+[Explorar endpoints](https://evently-api-ere0f4csdudkcvfe.centralus-01.azurewebsites.net/swagger)
 
 ## 📸 Vista de la API
 
@@ -20,12 +20,13 @@ El backend fue desarrollado con **ASP.NET Core**, **Entity Framework Core** y **
 
 - 🔐 Registro e inicio de sesión mediante JWT.
 - 🔑 Recuperación de contraseña mediante correo electrónico.
+- 📧 Envío de correos transaccionales con Brevo.
 - 👥 Roles de **User, Organizer y Admin**.
-- 📅 Gestión de eventos.
-- 🖼️ Carga de imágenes para eventos.
+- 📅 Creación, edición, publicación y cancelación de eventos.
+- 🖼️ Carga y almacenamiento de imágenes de eventos.
 - 🎫 Reserva y cancelación de entradas.
-- 🔢 Control de disponibilidad y capacidad.
-- 📱 Generación de códigos únicos para tickets.
+- 🔢 Control de capacidad y disponibilidad.
+- 📱 Código único para cada ticket.
 - ✅ Check-in de asistentes.
 - 🚫 Prevención de doble check-in.
 - 👥 Consulta de asistentes por evento.
@@ -35,9 +36,9 @@ El backend fue desarrollado con **ASP.NET Core**, **Entity Framework Core** y **
 
 ## 📚 Endpoints Principales
 
-- `/api/auth` → Autenticación y recuperación de contraseña.
+- `/api/auth` → Registro, login y recuperación de contraseña.
 - `/api/users` → Información y operaciones del usuario.
-- `/api/events` → Gestión de eventos.
+- `/api/events` → Gestión de eventos e imágenes.
 - `/api/tickets` → Reservas, tickets y check-in.
 - `/api/organizer` → Estadísticas y asistentes.
 - `/api/categories` → Categorías.
@@ -47,22 +48,35 @@ El backend fue desarrollado con **ASP.NET Core**, **Entity Framework Core** y **
 
 - Autenticación mediante JWT.
 - Autorización basada en roles.
+- Validación del estado y rol del usuario en cada sesión.
 - Contraseñas almacenadas mediante hashing.
 - Tokens de recuperación temporales y de un solo uso.
+- Hash de los tokens de recuperación almacenado en base de datos.
 - Validación de propiedad de eventos.
+- Prevención de doble check-in.
 - Control de capacidad desde el backend.
-- Prevención de reutilización de entradas.
-- API Keys y credenciales sensibles fuera del repositorio.
+- API Keys y credenciales almacenadas mediante variables de entorno.
+- Restricciones de firewall para el acceso a Azure SQL.
 
 ## 📧 Recuperación de Contraseña
 
-Evently utiliza **Brevo Transactional Email API** para enviar enlaces seguros de recuperación de contraseña.
+Evently utiliza **Brevo Transactional Email API** para enviar enlaces de recuperación.
 
 Los enlaces:
 
-- Tienen tiempo de expiración.
+- Tienen una duración limitada.
 - Solo pueden utilizarse una vez.
-- Utilizan tokens cuyo hash se almacena en la base de datos.
+- Utilizan tokens generados de forma aleatoria.
+- Solo almacenan el hash del token en la base de datos.
+
+## ☁️ Infraestructura
+
+- **Backend:** Microsoft Azure App Service.
+- **Base de datos:** Azure SQL Database.
+- **Frontend:** Netlify.
+- **Correos:** Brevo Transactional Email API.
+
+La base de datos utiliza el nivel gratuito de **Azure SQL Serverless** con pausa automática al alcanzar los límites gratuitos configurados.
 
 ## 🛠️ Tecnologías
 
@@ -76,10 +90,8 @@ Los enlaces:
 
 ## 🌐 Frontend
 
-La API es consumida por un frontend desarrollado con **React + TypeScript**.
-
 🔗 **Aplicación:**  
-[Evently](https://eventlyfront.netlify.app)
+[https://eventlyfront.netlify.app](https://eventlyfront.netlify.app)
 
 ---
 
